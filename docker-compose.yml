@@ -1,0 +1,30 @@
+version: '3'
+services:
+  caddy:
+    image: "caddy:latest"
+    volumes:
+      - ./ribbit.com.pem:/root/certs/ribbit.com.pem
+      - ./ribbit-public.com.pem:/root/certs/ribbit-public.com.pem
+      - ./Caddyfile:/etc/caddy/Caddyfile  # to mount custom Caddyfile
+    ports:
+      - "443:443"
+    depends_on:
+     - ribbit
+
+  ribbit:
+    depends_on:
+      - database
+    ports: 
+      - "0.0.0.0:8080:8080"
+    build: .
+    entrypoint: ["sh", "-c", "./initdb.sh"]
+
+  database:
+    image: "postgres:14.0"
+    ports:
+      - "5432:5432"
+    # volumes:
+    # add local volume mount if needed
+      # - ./data:/var/lib/postgresql/data/pgdata
+    environment:
+      POSTGRES_PASSWORD: password
